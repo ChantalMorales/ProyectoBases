@@ -58,14 +58,66 @@ def autest():
 
 
 def ventanaestudiante():
+    entradaPE1=StringVar()
+    entradaPE2=StringVar()
+    salidatest1=StringVar()
+    list_tot_est1=[]    
+    lis_auxira=[]
     ventana.withdraw()
     win=Toplevel()
     win.geometry("450x300+200+200")
     win.title("Sistema Estudiantes")
-    elegir=Label(win,text="Por favor escoja una materia: ",font=("Agency FB",15)).place(x=60, y=20)
-    listaMat=ttk.Combobox(win,state ="readonly",font=("Agency FB",15))
-    listaMat.place(x=160, y=60,width=200,height=30)
-    listaMat['values']=['Programacion','Sistemas','Algoritmos']
+    elegir=Label(win,text="Por favor escoja una opcion: ",font=("Agency FB",15)).place(x=60, y=20)
+    clavemat_es=Label(win,text="Por favor ingrese la clave de la materia: ",font=("Agency FB",15)).place(x=60, y=70)
+    passwdMat_es=Entry(win,textvariable=entradaPE1,font=("Helvetica",15))
+    passwdMat_es.place(x=60,y=100)
+    claveid_es=Label(win,text="Por favor ingrese su id de estudiante: ",font=("Agency FB",15)).place(x=60, y=130)
+    passwdid_es=Entry(win,textvariable=entradaPE2,font=("Helvetica",15))
+    passwdid_es.place(x=60,y=160)
+    lresultot_est=Label(win,textvariable=salidatest1,font=("Agency FB",15))
+    lresultot_est.place(x=65,y=270)    
+    def Nprogest():
+        id_est=passwdid_es.get()
+        mat_est=passwdMat_es.get()
+        totnota_est="SELECT Nota FROM notas WHERE Id_materiaFK='"+mat_est+"'" 
+        cursor.execute(totnota_est)
+        lista_tot_est=cursor.fetchall()
+        for rowt1_est in lista_tot_est:
+            list_tot_est1.append(str(rowt1_est[0]))
+        
+
+        salidatest1.set(list_tot_est1)        
+        db.commit()
+
+    
+    def TodasNotas():
+        id_est=passwdid_es.get()
+        mat_est=passwdMat_es.get()
+        totnota_est="SELECT Nota FROM notas WHERE Id_estFK='"+id_est+"'" 
+        cursor.execute(totnota_est)
+        lista_tot_est=cursor.fetchall()
+        for rowt1_est in lista_tot_est:
+            list_tot_est1.append(str(rowt1_est[0]))
+        
+
+        salidatest1.set(list_tot_est1)        
+        db.commit()    
+
+    def Ira():
+        id_est=passwdid_es.get()
+        promnot="SELECT AVG(Nota) FROM notas WHERE Id_estFK='"+id_est+"'"
+        cursor.execute(promnot)
+        lista_promediosira=cursor.fetchall()
+        for rowira in lista_promediosira:
+            lis_auxira.append(str(rowira[0]*4))
+            salidatest1.set(lis_auxira)    
+                
+        db.commit()
+        
+    
+    mostrarprog=Button(win,text="Mostrar Notas ",command=Nprogest,font=("Agency FB",15)).place(x=100, y=190,width=100)
+    mostrarTo=Button(win,text="Mostrar Todo",command=TodasNotas,font=("Agency FB",15)).place(x=300,y=190)
+    ira=Button(win,text="IRA",command=Ira,font=("Agency FB",15)).place(x=230,y=230,width=50)    
 
 def ventanaprog():
     ventana.withdraw()
@@ -191,6 +243,7 @@ def elimnotP():
 def PromnotP():
     entradaprom1=StringVar()
     salidaprom1=StringVar()
+    lis_aux=[]
     ventana.withdraw()
     winprom_p=Toplevel()
     winprom_p.geometry("450x300")
@@ -203,8 +256,13 @@ def PromnotP():
     lresultp.place(x=65,y=195)
     def promedionota1():
         id_est_prom=txtprom_p.get()
-        promnota1="SELECT AVG(Nota) FROM notas WHERE Id_estFK='"+id_est_prom+"' "
-        salidaprom1.set(cursor.execute(promnota1))        
+        promnota1="SELECT AVG(Nota) FROM notas WHERE Id_estFK like '"+id_est_prom+"' "
+        cursor.execute(promnota1)
+        lista_promedios=cursor.fetchall()
+        for row in lista_promedios:
+            lis_aux.append(str(row[0]))
+            salidaprom1.set(lis_aux)    
+                
         db.commit()
 
         print("El promedio fue mostrado correctamente")
@@ -216,6 +274,7 @@ def MaxMinP():
     entradamax1=StringVar()
     salidamax1=StringVar()
     salidamax2=StringVar()
+    listmax,listmin=[],[]
     ventana.withdraw()
     winmax_p=Toplevel()
     winmax_p.geometry("450x300")
@@ -232,19 +291,53 @@ def MaxMinP():
     def maxnota1():
         id_est_max=txtmax_p.get()
         maxnota1="SELECT MAX(Nota) FROM notas WHERE Id_estFK='"+id_est_max+"' "
-        minnota1="SELECT MIN(Nota) FROM notas WHERE Id_estFK='"+id_est_max+"' "
-        salidamax1.set(cursor.execute(maxnota1)) 
-        salidamax2.set(cursor.execute(minnota1))       
+        #minnota1="SELECT MIN(Nota) FROM notas WHERE Id_estFK='"+id_est_max+"' "
+        cursor.execute(maxnota1)
+        #cursor.execute(minnota1)
+        lista_max=cursor.fetchall()
+        #lista_min=cursor.fetchall()
+
+        for row1 in lista_max :
+            listmax.append(str(row1[0]))
+
+        #for row2 in lista_min:
+        #    listmin.append(str(row2[0]))
+
+        salidamax1.set(listmax)
+        #salidamax2.set(listmin)       
         db.commit()
+    
+    def minnota1():
+        id_est_max=txtmax_p.get()
+        #maxnota1="SELECT MAX(Nota) FROM notas WHERE Id_estFK='"+id_est_max+"' "
+        minnota1="SELECT MIN(Nota) FROM notas WHERE Id_estFK='"+id_est_max+"' "
+        #cursor.execute(maxnota1)
+        cursor.execute(minnota1)
+        #lista_max=cursor.fetchall()
+        lista_min=cursor.fetchall()
 
-        print("Las notas maximas y minimas fueron mostradas correctamente")
+        #for row1 in lista_max :
+        #    listmax.append(str(row1[0]))
 
-    mostrar_max1=Button(winmax_p,text="Mostrar",command=maxnota1,font=("Agency FB",15)).place(x=300, y=140,width=100)     
+        for row2 in lista_min:
+            listmin.append(str(row2[0]))
+
+        #salidamax1.set(listmax)
+        salidamax2.set(listmin)       
+        db.commit()        
+            
+        
+
+
+    print("Las notas maximas y minimas fueron mostradas correctamente")
+    mostrar_max1=Button(winmax_p,text="Mostrar Maxima",command=maxnota1,font=("Agency FB",15)).place(x=300, y=140,width=100)
+    mostrar_min1=Button(winmax_p,text="Mostrar Minima",command=minnota1,font=("Agency FB",15)).place(x=300, y=190,width=100)     
 
 
 def TotalnotP():
     entradatot1=StringVar()
     salidatot1=StringVar()
+    listtot1=[]
     ventana.withdraw()
     wintot_p=Toplevel()
     wintot_p.geometry("450x300")
@@ -257,8 +350,14 @@ def TotalnotP():
     lresultotp.place(x=65,y=195)
     def total1():
         id_est_tot=txttot_p.get()
-        totnota1="SELECT * FROM notas WHERE Id_estFK='"+id_est_tot+"' "
-        salidatot1.set(cursor.execute(totnota1))        
+        totnota1="SELECT Nota FROM notas WHERE Id_estFK='"+id_est_tot+"' "
+        cursor.execute(totnota1)
+        lista_tot=cursor.fetchall()
+        for rowt1 in lista_tot:
+            listtot1.append(str(rowt1[0]))
+        
+
+        salidatot1.set(listtot1)        
         db.commit()
 
         print("El total de notas fue mostrado correctamente")
@@ -367,6 +466,7 @@ def elimnotS():
 def PromnotS():
     entradaprom2=StringVar()
     salidaprom2=StringVar()
+    lisaux_s=[]
     ventana.withdraw()
     winprom_s=Toplevel()
     winprom_s.geometry("450x300")
@@ -380,7 +480,12 @@ def PromnotS():
     def promedionota2():
         id_est_proms=txtprom_s.get()
         promnota2="SELECT AVG(Nota) FROM notas WHERE Id_estFK='"+id_est_proms+"' "
-        salidaprom2.set(cursor.execute(promnota2))        
+        cursor.execute(promnota2)
+        listapromedios_s=cursor.fetchall()
+        for rows1 in listapromedios_s:
+            lisaux_s.append(str(rows1[0]))    
+        
+        salidaprom2.set(lisaux_s)        
         db.commit()
 
         print("El promedio fue mostrado correctamente")
@@ -392,6 +497,7 @@ def MaxMinS():
     entradamax2=StringVar()
     salidamax1_s=StringVar()
     salidamax2_s=StringVar()
+    listmax_s,listmin_s=[],[]
     ventana.withdraw()
     winmax_s=Toplevel()
     winmax_s.geometry("450x300")
@@ -408,19 +514,34 @@ def MaxMinS():
     def maxnota2():
         id_est_maxs=txtmax_s.get()
         maxnota1_s="SELECT MAX(Nota) FROM notas WHERE Id_estFK='"+id_est_maxs+"' "
-        minnota1_s="SELECT MIN(Nota) FROM notas WHERE Id_estFK='"+id_est_maxs+"' "
-        salidamax1_s.set(cursor.execute(maxnota1_s)) 
-        salidamax2_s.set(cursor.execute(minnota1_s))       
+        cursor.execute(maxnota1_s)
+        lista_max_s=cursor.fetchall()
+        for rows2 in lista_max_s:
+            listmax_s.append(str(rows2[0]))
+
+        salidamax1_s.set(listmax_s)      
         db.commit()
+    
+    def minnota2():
+        id_est_maxs=txtmax_s.get()
+        minnota1_s="SELECT MIN(Nota) FROM notas WHERE Id_estFK='"+id_est_maxs+"' "
+        cursor.execute(minnota1_s)
+        lista_min_s=cursor.fetchall()
+        for rows3 in lista_min_s:
+            listmin_s.append(str(rows3[0]))
 
-        print("Las notas maximas y minimas fueron mostradas correctamente")
+        salidamax2_s.set(listmin_s) 
+        db.commit()
+        
+    print("Las notas maximas y minimas fueron mostradas correctamente")
 
-    mostrar_max2=Button(winmax_s,text="Mostrar",command=maxnota2,font=("Agency FB",15)).place(x=300, y=140,width=100)     
-
+    mostrar_max2=Button(winmax_s,text="Mostrar Maxima",command=maxnota2,font=("Agency FB",15)).place(x=300, y=140,width=100)     
+    mostrar_min2=Button(winmax_s,text="Mostrar Minima",command=minnota2,font=("Agency FB",15)).place(x=300, y=190,width=100)
 
 def TotalnotS():
     entradatot2=StringVar()
     salidatot2=StringVar()
+    listtot2=[]
     ventana.withdraw()
     wintot_s=Toplevel()
     wintot_s.geometry("450x300")
@@ -434,10 +555,15 @@ def TotalnotS():
     def total2():
         id_est_tots=txttot_s.get()
         totnota2="SELECT * FROM notas WHERE Id_estFK='"+id_est_tots+"' "
-        salidatot2.set(cursor.execute(totnota2))        
+        cursor.execute(totnota2)
+        list_tot_s=cursor.fetchall()
+        for rows4 in list_tot_s:
+            listtot2.append(str(rows4[0]))
+        
+        salidatot2.set(listtot2)        
         db.commit()
 
-        print("El total de notas fue mostrado correctamente")
+    print("El total de notas fue mostrado correctamente")
 
     mostrar_tot2=Button(wintot_s,text="Mostrar",command=total2,font=("Agency FB",15)).place(x=300, y=140,width=100) 
 
@@ -541,6 +667,7 @@ def elimnotA():
 def PromnotA():
     entradaprom3=StringVar()
     salidaprom3=StringVar()
+    lis_aux_A=[]
     ventana.withdraw()
     winprom_A=Toplevel()
     winprom_A.geometry("450x300")
@@ -554,7 +681,12 @@ def PromnotA():
     def promedionota3():
         id_est_promA=txtprom_A.get()
         promnota3="SELECT AVG(Nota) FROM notas WHERE Id_estFK='"+id_est_promA+"' "
-        salidaprom3.set(cursor.execute(promnota3))        
+        cursor.execute(promnota3)
+        listaux_A=cursor.fetchall()
+        for rowA1 in listaux_A:
+            lis_aux_A.append(str(rowA1[0]))
+        
+        salidaprom3.set()        
         db.commit()
 
         print("El promedio fue mostrado correctamente")
@@ -562,10 +694,11 @@ def PromnotA():
     mostrar_prom3=Button(winprom_A,text="Mostrar",command=promedionota3,font=("Agency FB",15)).place(x=300, y=140,width=100)    
 
 
-def MaxMinS():
+def MaxMinA():
     entradamax3=StringVar()
     salidamax1_A=StringVar()
     salidamax2_A=StringVar()
+    listmax_A,listmin_A=[],[]
     ventana.withdraw()
     winmax_A=Toplevel()
     winmax_A.geometry("450x300")
@@ -582,19 +715,37 @@ def MaxMinS():
     def maxnota3():
         id_est_maxA=txtmax_A.get()
         maxnota1_A="SELECT MAX(Nota) FROM notas WHERE Id_estFK='"+id_est_maxA+"' "
-        minnota1_A="SELECT MIN(Nota) FROM notas WHERE Id_estFK='"+id_est_maxA+"' "
-        salidamax1_A.set(cursor.execute(maxnota1_A)) 
-        salidamax2_A.set(cursor.execute(minnota1_A))       
+        cursor.execute(maxnota1_A)
+        lista_max_A=cursor.fetchall()
+        for rowA2 in lista_max_A:
+            listmax_A.append(str(rowA2[0]))
+
+        salidamax1_A.set(listmax_A) 
+               
         db.commit()
+    
+    def minnota3():
+        id_est_maxA=txtmax_A.get()
+        minnota1_A="SELECT MIN(Nota) FROM notas WHERE Id_estFK='"+id_est_maxA+"' "
+        cursor.execute(minnota1_A)
+        lista_min_A=cursor.fetchall()
+        for rowA3 in lista_min_A:
+            listmin_A.append(str(rowA3[0]))
 
-        print("Las notas maximas y minimas fueron mostradas correctamente")
+        salidamax2_A.set(listmin_A)
 
-    mostrar_max3=Button(winmax_A,text="Mostrar",command=maxnota3,font=("Agency FB",15)).place(x=300, y=140,width=100)     
+        db.commit()
+    
 
+    print("Las notas maximas y minimas fueron mostradas correctamente")
+
+    mostrar_max3=Button(winmax_A,text="Mostrar Maxima",command=maxnota3,font=("Agency FB",15)).place(x=300, y=140,width=100)     
+    mostrar_min3=Button(winmax_A,text="Mostrar Minima",command=minnota3,font=("Agency FB",15)).place(x=300, y=190,width=100)
 
 def TotalnotA():
     entradatot3=StringVar()
     salidatot3=StringVar()
+    listtot3=[]
     ventana.withdraw()
     wintot_A=Toplevel()
     wintot_A.geometry("450x300")
@@ -608,10 +759,16 @@ def TotalnotA():
     def total3():
         id_est_totA=txttot_A.get()
         totnota3="SELECT * FROM notas WHERE Id_estFK='"+id_est_totA+"' "
-        salidatot3.set(cursor.execute(totnota3))        
+        cursor.execute(totnota3)
+        lista_tot3=cursor.fetchall()
+        for rowt3 in lista_tot3:
+            listtot3.append(str(rowt3[0]))
+        
+
+        salidatot3.set(listtot3)        
         db.commit()
 
-        print("El total de notas fue mostrado correctamente")
+    print("El total de notas fue mostrado correctamente")
 
     mostrar_tot3=Button(wintot_A,text="Mostrar",command=total3,font=("Agency FB",15)).place(x=300, y=140,width=100) 
 
